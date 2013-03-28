@@ -13,10 +13,10 @@
 #define kCellHeight 44
 
 @interface DynamicCellSizeTableViewController (){
-    NSArray * labelTextArray;
-    NSIndexPath * expandedIndexPath;
+    NSArray * _labelTextArray;
+    NSIndexPath * _expandedIndexPath;
     
-    UIFont* labelFont;
+    UIFont* _labelFont;
 }
 
 @end
@@ -36,10 +36,10 @@
 {
     [super viewDidLoad];
     
-    expandedIndexPath = nil;
-    labelFont = [UIFont systemFontOfSize:17.0];
+    _expandedIndexPath = nil;
+    _labelFont = [UIFont systemFontOfSize:17.0];
     
-    labelTextArray = @[
+    _labelTextArray = @[
                        @"Nulla facilisi. In vel sem. Morbi id urna in diam dignissim feugiat. Proin molestie tortor eu velit. Aliquam erat volutpat. Nullam ultrices, diam tempus vulputate egestas, eros pede varius leo, sed imperdiet lectus est ornare odio. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Proin consectetuer velit in dui. Phasellus wisi purus, interdum vitae, rutrum accumsan, viverra in, velit. Sed enim risus, congue non, tristique in, commodo eu, metus. Aenean tortor mi, imperdiet id, gravida eu, posuere eu, felis. Mauris sollicitudin, turpis in hendrerit sodales, lectus ipsum pellentesque ligula, sit amet scelerisque urna nibh ut arcu. Aliquam in lacus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nulla placerat aliquam wisi. Mauris viverra odio. Quisque fermentum pulvinar odio. Proin posuere est vitae ligula. Etiam euismod. Cras a eros.",
                        @"Vivamus auctor leo vel dui. Aliquam erat volutpat. Phasellus nibh. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Cras tempor. Morbi egestas, urna non consequat tempus, nunc arcu mollis enim, eu aliquam erat nulla non nibh. Duis consectetuer malesuada velit. Nam ante nulla, interdum vel, tristique ac, condimentum non, tellus. Proin ornare feugiat nisl. Suspendisse dolor nisl, ultrices at, eleifend vel, consequat at, dolor.",
                        @"Nulla facilisi. In vel sem. Morbi id urna in diam dignissim feugiat. Proin molestie tortor eu velit. Aliquam erat volutpat. Nullam ultrices, diam tempus vulputate egestas, eros pede varius leo, sed imperdiet lectus est ornare odio. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Proin consectetuer velit in dui. Phasellus wisi purus, interdum vitae, rutrum accumsan, viverra in, velit. Sed enim risus, congue non, tristique in, commodo eu, metus. Aenean tortor mi, imperdiet id, gravida eu, posuere eu, felis. Mauris sollicitudin, turpis in hendrerit sodales, lectus ipsum pellentesque ligula, sit amet scelerisque urna nibh ut arcu. Aliquam in lacus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nulla placerat aliquam wisi. Mauris viverra odio. Quisque fermentum pulvinar odio. Proin posuere est vitae ligula. Etiam euismod. Cras a eros."];
@@ -60,7 +60,7 @@
 - (CGSize)getFullSizeOfLabelForText:(NSString*)labelText{
     //up to infinite height
     CGSize maxSize = CGSizeMake(kLabelWidth, FLT_MAX);
-    CGSize expectedSize = [labelText sizeWithFont:labelFont constrainedToSize:maxSize lineBreakMode:NSLineBreakByWordWrapping];
+    CGSize expectedSize = [labelText sizeWithFont:_labelFont constrainedToSize:maxSize lineBreakMode:NSLineBreakByWordWrapping];
     
     if (expectedSize.width < kLabelWidth) expectedSize.width = kLabelWidth;
     return expectedSize;
@@ -69,15 +69,15 @@
 - (IBAction)expandButtonSelected:(id)sender{
     UITableViewCell *cell = (UITableViewCell *)[[sender superview] superview];
     NSIndexPath *indexPath = [self.tableView indexPathForRowAtPoint:cell.center];
-    NSIndexPath* oldPath = expandedIndexPath;
-    if(expandedIndexPath && [expandedIndexPath isEqual: indexPath]) {
-        expandedIndexPath = nil;
+    NSIndexPath* oldPath = _expandedIndexPath;
+    if(_expandedIndexPath && [_expandedIndexPath isEqual: indexPath]) {
+        _expandedIndexPath = nil;
     }else{
-        expandedIndexPath = indexPath;
+        _expandedIndexPath = indexPath;
     }
     
     NSMutableArray* indexPaths = [NSMutableArray array];
-    if(expandedIndexPath) [indexPaths addObject:expandedIndexPath];
+    if(_expandedIndexPath) [indexPaths addObject:_expandedIndexPath];
     if(oldPath) [indexPaths addObject:oldPath];
     if([indexPaths count] > 0) [self.tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
     [self.tableView beginUpdates];
@@ -88,8 +88,8 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
     CGFloat additionalHeight = 0;
-    if(expandedIndexPath && indexPath.row == expandedIndexPath.row){
-        CGSize newSize = [self getFullSizeOfLabelForText:[labelTextArray objectAtIndex:indexPath.row]];
+    if(_expandedIndexPath && indexPath.row == _expandedIndexPath.row){
+        CGSize newSize = [self getFullSizeOfLabelForText:[_labelTextArray objectAtIndex:indexPath.row]];
         additionalHeight = newSize.height - kLabelHeight;
     }
     
@@ -105,7 +105,7 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    return [labelTextArray count];
+    return [_labelTextArray count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -117,12 +117,12 @@
     UILabel* textLabel = (UILabel*)[cell viewWithTag:101];
     UIButton* expandButton = (UIButton*)[cell viewWithTag:102];
     
-    [textLabel setText:[labelTextArray objectAtIndex:indexPath.row]];
+    [textLabel setText:[_labelTextArray objectAtIndex:indexPath.row]];
     textLabel.frame = CGRectMake(textLabel.frame.origin.x, textLabel.frame.origin.y, kLabelWidth, kLabelHeight);
 
-    if(expandedIndexPath != nil && expandedIndexPath.row == indexPath.row){
+    if(_expandedIndexPath != nil && _expandedIndexPath.row == indexPath.row){
         //resize label
-        CGSize expectedSize = [self getFullSizeOfLabelForText:[labelTextArray objectAtIndex:indexPath.row]];
+        CGSize expectedSize = [self getFullSizeOfLabelForText:[_labelTextArray objectAtIndex:indexPath.row]];
         textLabel.frame = CGRectMake(textLabel.frame.origin.x, textLabel.frame.origin.y, expectedSize.width, expectedSize.height);
         [expandButton setTitle:@"Shrink" forState:UIControlStateNormal];
     }else{
